@@ -1,3 +1,9 @@
 const startWhatsAppBot = require("./whatsapp");
+const { loadPDFs } = require("./pdfLoader");
 
-startWhatsAppBot();
+async function main() {
+    await loadPDFs(); // ⬅️ load PDF dulu
+    startWhatsAppBot();
+}
+
+main();

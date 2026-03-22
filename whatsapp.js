@@ -7,6 +7,8 @@ const {
 
 const qrcode = require("qrcode-terminal");
 const askAI = require("./ollama");
+const { getHistory, addMessage, resetMemory } = require("./memory");
+const handleCommand = require("./command");
 
 async function startWhatsAppBot() {
 
@@ -46,23 +48,40 @@ async function startWhatsAppBot() {
 
         const msg = messages[0];
 
+        if (!msg) return;
         if (!msg.message) return;
         if (msg.key.fromMe) return;
 
         const text =
-        msg.message.conversation ||
-        msg.message.extendedTextMessage?.text;
+        msg.message?.conversation ||
+        msg.message?.extendedTextMessage?.text;
 
         if (!text) return;
 
+        // =======================
+        // COMMAND HANDLER
+        // =======================
+        
         const sender = msg.key.remoteJid;
+
+        const isCommand = await handleCommand(text, sender, sock);
+        if (isCommand) return;
 
         console.log("User:", text);
 
-        const aiResponse = await askAI(text);
+        // const aiResponse = await askAI(text);
+
+        // tambah user message
+        addMessage(sender, "user", text);
+
+        // ambil history terbaru
+        const updatedHistory = getHistory(sender);
+        const aiResponse = await askAI(updatedHistory, text);
+
+        // simpan response AI
+        addMessage(sender, "assistant", aiResponse);
 
         console.log("AI:", aiResponse);
-
         await sock.sendMessage(sender, {
             text: aiResponse
         });
