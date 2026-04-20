@@ -1,0 +1,13 @@
+Test Case Login:
+
+1. Open login page
+2. Input valid email
+3. Input password
+4. Click login
+5. Verify dashboard
+
+Bug Handling:
+
+- Jika login gagal, cek response API
+- Pastikan status code 200
+- Validasi error message
